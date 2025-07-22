@@ -1,11 +1,10 @@
-import { CirclePercent, Gem, MessageCircle, Save, Trash2, CirclePlus, AlertCircle, Truck, User, Search } from "lucide-react";
+import { CirclePercent, Gem, MessageCircle, Save, Trash2, CirclePlus, AlertCircle, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
 import useStoreStore from "../zustand/store.store";
 import DashboardLoader from "../components/DashboardLoader";
 import { ThemeButton } from "../components/Buttons";
-import { TextArea, Select } from "../components/Inputs";
+import { TextArea } from "../components/Inputs";
 import { Input } from "../components/Inputs";
-import TableLoader from "../components/TableLoader";
 
 export default function ManageStore() {
 
@@ -54,18 +53,11 @@ export default function ManageStore() {
                     Manage Shipping Charges
                 </button>
 
-                <button onClick={() => setTab("ADMIN_ACTIVITIES")}
-                    className={`flex items-center gap-2 p-6 border border-gray-200 h-32 px-6 rounded-lg transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${tab === "ADMIN_ACTIVITIES" ? "bg-gray-700 text-white" : "bg-white text-gray-700"}`}
-                >
-                    <User className="w-5 h-5" />
-                    View Admin Activities
-                </button>
             </div>
 
             {tab === "COUPONS" && <Coupons />}
             {tab === "PROMOTIONS" && <PromotionMessages />}
             {tab === "SHIPPING_CHARGES" && <ShippingCharges />}
-            {tab === "ADMIN_ACTIVITIES" && <AdminAcitivities />}
 
         </div>
     );
@@ -354,142 +346,5 @@ function ShippingCharges() {
             )}
 
         </div>
-    );
-}
-
-function AdminAcitivities() {
-
-    const [search, setSearch] = useState("");
-    const [selectedAction, setSelectedAction] = useState("");
-    const [selectedDate, setSelectedDate] = useState(getLastEightDates()[0]?.value);
-    const [filteredActivities, setFilteredActivities] = useState([]);
-
-    const { getAdminsActivities, adminsActivities, isGettingAdminsActivities } = useStoreStore();
-
-    useEffect(() => {
-        if (!selectedDate) return;
-        getAdminsActivities(selectedDate);
-    }, [selectedDate, getAdminsActivities]);
-
-    const filterLogsByEmailAndAction = (logs, email, action) => {
-        if (!email && !action) return logs;
-        return logs.filter(log => {
-            const emailMatch = email ? log.email === email : true;
-            const actionMatch = action ? log.action === action : true;
-            return emailMatch && actionMatch;
-        });
-    };
-
-    useEffect(() => {
-        const filteredLogs = filterLogsByEmailAndAction(adminsActivities, search, selectedAction);
-        setFilteredActivities(filteredLogs);
-    }, [search, selectedAction, adminsActivities]);
-
-    function getLastEightDates() {
-        const dates = [];
-
-        for (let i = 0; i < 8; i++) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, "0");
-            const dd = String(date.getDate()).padStart(2, "0");
-            const value = `${yyyy}-${mm}-${dd}`; // For backend / value
-
-            const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
-            const label = `${yyyy}-${mm}-${dd} (${dayName})`;   // For display
-
-            dates.push({ value, label });
-        }
-        return dates;
-    }
-
-    function getAction(action) {
-        if (action === "LOGIN")
-            return <span className="text-green-500 font-medium bg-green-100 px-3 py-1.5 rounded-full">login</span>;
-        if (action === "LOGOUT")
-            return <span className="text-red-500 font-medium bg-red-100 px-3 py-1.5 rounded-full">logout</span>;
-        return action;
-    }
-
-    return (
-        <div className="animate-themeAnimationLg bg-white rounded-2xl shadow-xl py-8 px-4 border border-gray-200 w-full">
-            <h2 className="text-2xl font-bold text-gray-700">
-                View Admin Activities
-            </h2>
-
-            <div className="my-6 mx-auto flex justify-between gap-5 items-center">
-                <Select
-                    label="Select Date"
-                    name="selectedDate"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    placeholder="Select a date"
-                    options={getLastEightDates()}
-                    required={true}
-                />
-
-                <Input
-                    label="Search by Email"
-                    name="search"
-                    value={search}
-                    icon={<Search className="w-4 h-4 text-gray-400" />}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search by email..."
-                />
-
-                <Select
-                    label="Select Action"
-                    name="selectedAction"
-                    value={selectedAction}
-                    onChange={(e) => setSelectedAction(e.target.value)}
-                    placeholder="Select an action"
-                    options={[{ label: "All", value: "" }, { label: "LOGIN", value: "LOGIN" }, { label: "LOGOUT", value: "LOGOUT" }]}
-                    required={true}
-                />
-            </div>
-
-            <div>
-
-                {filteredActivities?.length === 0 ? (
-                    <div className="flex items-center justify-center py-20 gap-2">
-                        <AlertCircle className="w-10 h-10 text-gray-400" />
-                        <p className="text-gray-500">No activities found</p>
-                    </div>
-                ) : (
-                    <table className="w-full">
-                        <thead>
-                            <tr className="text-left bg-gray-50 border-b border-gray-200">
-                                <th className="px-2 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                <th className="px-2 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
-                                <th className="px-2 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                            </tr>
-                        </thead>
-                        {isGettingAdminsActivities ? (
-                            <TableLoader />
-                        ) : (
-                            <tbody>
-                                {filteredActivities?.map((activity, index) => (
-                                    <tr key={index}>
-
-                                        <td className="px-2 py-3">
-                                            <div className="text-xs text-gray-600">{activity?.email}</div>
-                                        </td>
-                                        <td className="px-2 py-3">
-                                            <div className="font-medium text-gray-600">{activity?.message}</div>
-                                        </td>
-                                        <td className="px-2 py-3">
-                                            <div className="text-xs text-gray-600">{getAction(activity?.action)}</div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        )}
-                    </table>
-                )}
-            </div>
-
-        </div >
     );
 }

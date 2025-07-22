@@ -6,7 +6,6 @@ import Analytics from "./Analytics";
 import ManageStore from "./ManageStore";
 import ManageAdmins from "./ManageAdmins";
 import { useEffect, useState } from "react";
-import useLogStore from "../zustand/log.store";
 import useAuthStore from "../zustand/auth.store";
 import useOrderStore from "../zustand/order.store";
 import useReviewStore from "../zustand/review.store";
@@ -17,7 +16,6 @@ import { ShoppingCart, Menu, LogOut, Home } from "lucide-react";
 
 export default function AdminPortal() {
 
-    const { logAdminLogin } = useLogStore();
     const { authenticatedAdmin } = useAuthStore();
     const [adminTabs, setAdminTabs] = useState([]);
     const { pendingOrdersCount } = useOrderStore();
@@ -31,13 +29,6 @@ export default function AdminPortal() {
     useEffect(() => {
         getOverviewDataAndSidebarCounts();
     }, [getOverviewDataAndSidebarCounts]);
-
-    // LOG ADMIN ACTIVITY LOGIN AND LOGOUT
-    useEffect(() => {
-        if (authenticatedAdmin) {
-            logAdminLogin(authenticatedAdmin.name, authenticatedAdmin.email);
-        }
-    }, [authenticatedAdmin, logAdminLogin]);
 
     // SET ADMIN TABS ON ROLE CHANGE
     useEffect(() => {

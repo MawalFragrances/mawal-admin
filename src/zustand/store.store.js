@@ -91,19 +91,6 @@ const useStoreStore = create((set, get) => ({
         finally { set({ isUpdatingShippingSettings: false }); }
     },
 
-    isGettingAdminsActivities: false,
-    getAdminsActivities: async (date) => {
-        set({ isGettingAdminsActivities: true });
-        try {
-            const response = await axiosInstance.get(`api/v1/admin-logs/get-admins-activities?date=${date}`);
-            set({ adminsActivities: response?.data?.data || [] });
-        }
-        catch (error) {
-            consoleError("getAdminsActivities (Store Store)", error);
-            toast.error(error.response?.data?.message || "Internal Server Error.");
-        }
-        finally { set({ isGettingAdminsActivities: false }); }
-    }
 
 }));
 
